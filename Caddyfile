@@ -13,10 +13,6 @@ matrix.example.com {
 
 
 livekit.example.com {
-        header X-Robots-Tag "noindex, nofollow"
-        encode gzip
-        import log-config
-
 		#Route to jwt-service
         route /sfu/get* {
         reverse_proxy localhost:8451
