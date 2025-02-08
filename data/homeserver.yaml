@@ -1,0 +1,71 @@
+# Configuration file for Synapse.
+#
+# This is a YAML file: see [1] for a quick introduction. Note in particular
+# that *indentation is important*: all the elements of a list or dictionary
+# should have the same indentation.
+#
+# [1] https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+#
+# For more information on how to configure Synapse, including a complete accounting of
+# each option, go to docs/usage/configuration/config_documentation.md or
+# https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
+server_name: "example.com"
+public_baseurl: https://matrix.example.com
+pid_file: /data/homeserver.pid
+listeners:
+  - port: 8448
+    tls: false
+    type: http
+    x_forwarded: true
+    resources:
+      - names: [client, federation]
+        compress: false
+
+serve_server_wellknown: true
+
+database:
+  name: psycopg2
+  args:
+    user: synapse
+    password: <db_password>
+    database: synapse
+    host: db
+    cp_min: 5
+    cp_max: 10
+log_config: "/data/my.matrix.host.log.config"
+media_store_path: /data/media_store
+report_stats: true
+signing_key_path: "/data/my.matrix.host.signing.key"
+trusted_key_servers:
+  - server_name: "matrix.org"
+
+
+###Needed for element call
+experimental_features:
+    # MSC3266: Room summary API. Used for knocking over federation
+    msc3266_enabled: true
+    # MSC4222 needed for syncv2 state_after. This allow clients to
+    # correctly track the state of the room.
+#    msc4222_enabled: true
+
+# The maximum allowed duration by which sent events can be delayed, as
+# per MSC4140.
+max_event_delay_duration: 24h
+###
+
+rc_message:
+  # This needs to match at least the heart-beat frequency plus a bit of headroom
+  # Currently the heart-beat is every 5 seconds which translates into a rate of 0.2s
+  per_second: 0.5
+  burst_count: 30
+
+rc_admin_redaction:
+  per_second: 1
+  burst_count: 50
+
+rc_registration:
+  per_second: 0.3
+  burst_count: 4
+
+enable_registration: true
+registration_requires_token: true

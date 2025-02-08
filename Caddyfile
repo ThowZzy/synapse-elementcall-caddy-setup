@@ -1,0 +1,45 @@
+
+example.com, www.example.com {
+	#Headers & Well-known for Matrix & Element Call
+        header /.well-known/matrix/* Content-Type application/json
+        header /.well-known/matrix/* Access-Control-Allow-Origin *
+        respond /.well-known/matrix/server `{"m.server": "matrix.example.com:443"}`
+        respond /.well-known/matrix/client `{"m.homeserver": {"base_url": "https://matrix.example.com"}, "org.matrix.msc4143.rtc_foci": [{"type": "livekit", "livekit_service_url": "https://livekit.example.com"}]}`
+}
+
+matrix.example.com {
+	#reverse_proxy /_matrix/* http://localhost:8448
+        #reverse_proxy /_synapse/client/* http://localhost:8448
+        reverse_proxy localhost:8448
+        header X-Robots-Tag "noindex, nofollow"
+        encode gzip
+        import log-config
+        #redir / /_matrix/static/
+	
+	handle /favicon.ico {
+                root * /var/www/favicon/matrix
+                file_server
+        }
+}
+
+
+livekit.example.com {
+        header X-Robots-Tag "noindex, nofollow"
+        encode gzip
+        import log-config
+
+		#Route to jwt-service
+        route /sfu/get* {
+        reverse_proxy localhost:8451
+        }
+        
+		#Route to jwt-service
+        route /healthz* {
+        reverse_proxy localhost:8451
+        }
+		
+		#Route to livekit
+        route /* {
+        reverse_proxy localhost:7880
+        }
+}

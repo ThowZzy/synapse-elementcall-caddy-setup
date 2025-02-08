@@ -1,0 +1,47 @@
+services:
+
+  synapse:
+    container_name: matrix-synapse
+    image: docker.io/matrixdotorg/synapse:latest
+    restart: unless-stopped
+    environment:
+      - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
+    volumes:
+      - ./data:/data
+    depends_on:
+      - db
+    ports:
+      - "127.0.0.1:8448:8448"
+
+  db:
+    container_name: matrix-postgres
+    image: docker.io/postgres:17.2
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=synapse
+      - POSTGRES_PASSWORD=<db_password>
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - ./db:/var/lib/postgresql/data
+
+  livekit:
+    container_name: matrix-livekit
+    image: livekit/livekit-server:latest
+    command: --config /etc/livekit.yaml
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./livekit/livekit.yaml:/etc/livekit.yaml
+
+  jwt-service:
+    image: ghcr.io/element-hq/lk-jwt-service:latest-ci
+    container_name: matrix-jwt-service
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8451:8080"
+    environment:
+      - LIVEKIT_SECRET=<StrongLongString>
+      - LIVEKIT_URL=wss://livekit.example.com:443
+      - LIVEKIT_KEY=devkey 
+      #Tip : don't change this value (devkey)
+  
