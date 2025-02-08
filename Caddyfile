@@ -8,18 +8,7 @@ example.com, www.example.com {
 }
 
 matrix.example.com {
-	#reverse_proxy /_matrix/* http://localhost:8448
-        #reverse_proxy /_synapse/client/* http://localhost:8448
         reverse_proxy localhost:8448
-        header X-Robots-Tag "noindex, nofollow"
-        encode gzip
-        import log-config
-        #redir / /_matrix/static/
-	
-	handle /favicon.ico {
-                root * /var/www/favicon/matrix
-                file_server
-        }
 }
 
 
